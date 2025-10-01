@@ -9,4 +9,3 @@ router.delete('/:id', deleteHero);
 
 module.exports = router;
 
-
