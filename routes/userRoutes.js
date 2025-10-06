@@ -4,6 +4,8 @@ const router = express.Router();
 const User = require('../models/User');
 const crypto = require('crypto');
 const { generateOtp, sendOtpEmail } = require('../utils/otp');
+const { protect } = require('../middleware/authMiddleware');
+const { getProfile, updateProfile } = require('../controllers/userController');
 
 // Send OTP
 router.post('/send-otp', async (req, res) => {
@@ -46,5 +48,9 @@ router.post('/verify-otp', async (req, res) => {
 
   res.status(200).json({ message: 'OTP verified', user });
 });
+
+// Profile routes
+router.get('/profile', protect, getProfile);
+router.put('/profile', protect, updateProfile);
 
 module.exports = router;

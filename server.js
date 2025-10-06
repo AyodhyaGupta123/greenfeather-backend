@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const heroRoutes = require('./routes/heroRoutes');
 const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
@@ -28,6 +29,7 @@ app.use('/api/users', authRoutes);
 app.use('/api/hero', heroRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Centralized error handler
 const errorHandler = require('./middleware/errorHandler');
