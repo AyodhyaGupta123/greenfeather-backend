@@ -1,10 +1,19 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getProducts, getProductById } = require('../controllers/productController');
+const productController = require("../controllers/productController");
+const upload = require("../middleware/upload"); // Your configured Multer instance
+const { protect } = require("../middleware/authMiddleware"); // Your authentication middleware
 
-router.get('/', getProducts);
-router.get('/:id', getProductById);
+
+router.post("/",protect,upload.array("images"), productController.createProduct);
+
+
+router.put('/:id',productController.updateProduct);
+
+
+router.get("/", protect, productController.getProducts);
+
+
+
 
 module.exports = router;
-
-

@@ -3,9 +3,12 @@ require('dotenv').config();
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const heroRoutes = require('./routes/heroRoutes');
-const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const sellerAuthRoutes = require("./routes/sellerAuthRoutes");
+const sellerOnboardingRoutes = require("./routes/sellerOnboardingRoutes");
+const productRoutes = require("./routes/productRoutes"); 
+const categoryRoutes = require("./routes/categoryRoutes"); 
 const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
@@ -27,9 +30,12 @@ app.use(morgan('dev'));
 // Routes
 app.use('/api/users', authRoutes);
 app.use('/api/hero', heroRoutes);
-app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
+app.use("/api/seller/auth", sellerAuthRoutes);
+app.use("/api/seller/onbording", sellerOnboardingRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/categories", categoryRoutes);
 
 // Centralized error handler
 const errorHandler = require('./middleware/errorHandler');
