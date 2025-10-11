@@ -86,6 +86,7 @@ exports.checkEmail = async (req, res) => {
   }
 };
 
+
 // Step 2: Verify Password & Send OTP
 exports.verifyPasswordAndSendOtp = async (req, res) => {
   try {
@@ -107,6 +108,7 @@ exports.verifyPasswordAndSendOtp = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Step 3: Verify OTP & Login
 exports.verifyOtpAndLogin = async (req, res) => {
@@ -177,7 +179,9 @@ exports.getProfile = async (req, res) => {
 // Step 1: Send OTP
 exports.forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
+    console.log("Forgot password request received");
+    console.log("Email:", req.body);
+    const { email } = req.body.email;
     if (!email) return res.status(400).json({ message: "Email is required" });
 
     const user = await User.findOne({ email });

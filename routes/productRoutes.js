@@ -13,6 +13,9 @@ router.put('/:id',productController.updateProduct);
 
 router.get("/", protect, productController.getProducts);
 
+// Public route for getting products by category (no auth required)
+router.get("/category", productController.getProductsByCategory);
+
 
 
 

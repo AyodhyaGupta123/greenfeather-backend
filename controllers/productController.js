@@ -219,3 +219,68 @@ exports.updateProduct = async (req, res) => {
         res.status(500).json({ message: 'Server error while updating product.' });
     }
 };
+
+// GET PRODUCTS BY CATEGORY WITH PAGINATION
+
+
+exports.getProductsByCategory = async (req, res) => {
+    console.log("Received query:", req.query);
+    try {
+        const { categoryId, page = 1, limit = 20 } = req.query;
+        
+        // Validate categoryId
+        if (!categoryId) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Category ID is required" 
+            });
+        }
+
+        // Validate ObjectId format
+        if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Invalid category ID format" 
+            });
+        }
+
+        // Parse pagination parameters
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
+
+        // Find products by category with pagination
+        const products = await Product.find({ category: categoryId })
+            .populate('category', 'name')
+            .populate('subcategory', 'name')
+            .populate('seller', 'name email')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limitNum);
+
+        // Get total count for pagination
+        const totalProducts = await Product.countDocuments({ category: categoryId });
+        const totalPages = Math.ceil(totalProducts / limitNum);
+
+        res.status(200).json({
+            success: true,
+            products,
+            pagination: {
+                currentPage: pageNum,
+                totalPages,
+                totalProducts,
+                hasNextPage: pageNum < totalPages,
+                hasPrevPage: pageNum > 1,
+                limit: limitNum
+            }
+        });
+
+    } catch (error) {
+        console.error("Error fetching products by category:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Server error while fetching products by category",
+            details: error.message 
+        });
+    }
+};

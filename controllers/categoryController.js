@@ -5,9 +5,10 @@ const Subcategory = require("../models/Subcategory");
 exports.getCategories = async (req, res) => {
   try {
     const categories = await Category.find({});
-    console.log(categories);
+    console.log('Categories found:', categories.length);
     res.json(categories);
   } catch (err) {
+    console.error('Error fetching categories:', err);
     res.status(500).json({ message: err.message });
   }
 };

@@ -15,14 +15,19 @@ const isValidPin = (pin) => /^[1-9][0-9]{5}$/.test(pin);
  * body: { gstNumber?, panNumber?, nonGstCategory (bool) }
  */
 exports.submitTaxDetails = async (req, res) => {
+  console.log("Submit tax details request received");
   try {
+    console.log("Body:", req.body);
     const userId = req.user._id;
-    const { gstNumber, panNumber, nonGstCategory } = req.body;
+    const { gstNumber, panNumber, panHolderName, nonGstCategory } = req.body;
 
     // validation
     if (nonGstCategory) {
       if (!panNumber || !isValidPAN(panNumber)) {
         return res.status(400).json({ message: "Invalid PAN number" });
+      }
+      if (!panHolderName || panHolderName.trim().length < 3) {
+        return res.status(400).json({ message: "PAN holder name is required" });
       }
     } else {
       if (!gstNumber || !isValidGST(gstNumber)) {
@@ -39,12 +44,18 @@ exports.submitTaxDetails = async (req, res) => {
     profile.nonGstCategory = !!nonGstCategory;
     profile.gstNumber = nonGstCategory ? null : gstNumber;
     profile.panNumber = nonGstCategory ? panNumber : panNumber || null;
+    profile.panHolderName = nonGstCategory ? panHolderName : null; // save PAN holder name only for non-GST
 
     // mark stepCompleted at least 1
     profile.stepCompleted = Math.max(profile.stepCompleted, 1);
 
     await profile.save();
-    return res.json({ success: true, message: "Tax details saved", stepCompleted: profile.stepCompleted, profile });
+    return res.json({
+      success: true,
+      message: "Tax details saved",
+      stepCompleted: profile.stepCompleted,
+      profile,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: err.message });
@@ -92,16 +103,15 @@ exports.submitStoreName = async (req, res) => {
 
 
 
-
 exports.submitPickupAddress = async (req, res) => {
   try {
     const userId = req.user._id;
-    
-    
-    const { address, city, stateName, pinCode } = req.body;
 
-    if (!address || !city || !stateName || !pinCode) {
-      return res.status(400).json({ message: "All address fields are required" });
+    const { address, city, stateName, pinCode, country } = req.body;
+
+    // Validate input
+    if (!address || !city || !stateName || !pinCode || !country) {
+      return res.status(400).json({ message: "All address fields including country are required" });
     }
 
     if (!isValidPin(pinCode)) {
@@ -109,13 +119,14 @@ exports.submitPickupAddress = async (req, res) => {
     }
 
     const profile = await SellerProfile.findOne({ userId });
-    
+
     if (!profile || profile.stepCompleted < 2) {
       return res.status(400).json({ message: "Complete previous steps first" });
     }
 
-    profile.pickupAddress = { address, city, stateName, pinCode };
+    profile.pickupAddress = { address, city, stateName, pinCode, country };
     profile.stepCompleted = Math.max(profile.stepCompleted, 3);
+
     await profile.save();
 
     return res.json({ success: true, message: "Pickup address saved", stepCompleted: profile.stepCompleted, profile });
