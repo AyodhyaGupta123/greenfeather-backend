@@ -10,8 +10,4 @@ const comparePassword = async (enteredPassword, hashedPassword) => {
   return await bcrypt.compare(enteredPassword, hashedPassword);
 };
 
-<<<<<<< HEAD
 module.exports = { hashPassword, comparePassword };
-=======
-module.exports = { hashPassword, comparePassword };
->>>>>>> origin/ayodhya-backend

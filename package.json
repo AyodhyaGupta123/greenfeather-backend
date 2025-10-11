@@ -3,8 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": " nodemon server.js",
-    "dev": "node server.js"
+    "start": "nodemon server.js",
+    "dev": "node server.js",
+    "init-super-admin": "node scripts/initSuperAdmin.js",
+    "create-admin": "node scripts/createAdmin.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

@@ -1,23 +1,20 @@
 const mongoose = require("mongoose");
 
 // --- 1. Order Item Schema (Nested within Order) ---
-// This captures the state of the product/price at the time of purchase
 const orderItemSchema = new mongoose.Schema({
     product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
         required: true,
     },
-    // Captures the specific variant/size purchased
     variantInfo: {
         color: { type: String, trim: true },
-        unit: { type: String, trim: true }, // Size/Unit purchased (e.g., 'Medium', '100g')
-        info: { type: String, trim: true }, // SKU or specific size detail
+        unit: { type: String, trim: true }, 
+        info: { type: String, trim: true }, 
     },
-    // Price and quantity at the time of order
     sellingPrice: { type: Number, required: true, min: 0 },
     quantity: { type: Number, required: true, min: 1 },
-    image: { type: String }, // Main image URL for the variant
+    image: { type: String }, 
 });
 
 // --- 2. Main Order Schema ---
@@ -27,7 +24,7 @@ const orderSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
-    orderItems: [orderItemSchema], // List of products bought
+    orderItems: [orderItemSchema],
     shippingAddress: {
         fullName: { type: String, required: true },
         addressLine1: { type: String, required: true },
@@ -41,7 +38,6 @@ const orderSchema = new mongoose.Schema({
         enum: ["Card", "Cash on Delivery", "UPI", "Net Banking"],
         required: true,
     },
-    // Reference to the Payment document
     payment: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Payment', 
