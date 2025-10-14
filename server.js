@@ -12,6 +12,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const adminRoutes = require('./routes/adminRoutes');
 const unifiedAuthRoutes = require('./routes/unifiedAuthRoutes');
 const adminManagementRoutes = require('./routes/adminManagementRoutes'); 
+const customerRoutes = require('./routes/customerRoutes');
 const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
@@ -33,7 +34,8 @@ const corsOptions = {
         'http://localhost:3001',
         'http://localhost:3002',
         'http://localhost:5173',
-        'http://localhost:5174' 
+        'http://localhost:5174',
+        'http://localhost:5175'
       ];
     
     if (allowedOrigins.indexOf(origin) !== -1) {
@@ -68,6 +70,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', unifiedAuthRoutes);
+app.use('/api/coustomer', customerRoutes);
 app.use('/api/admin-management', adminManagementRoutes);
 
 // Centralized error handler
