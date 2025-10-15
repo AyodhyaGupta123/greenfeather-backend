@@ -4,9 +4,6 @@ const { getCategories, getSubcategories } = require("../controllers/categoryCont
 
 
 router.get("/", getCategories);
-
-
-
 router.get("/:categoryId/subcategories", getSubcategories);
 
 module.exports = router;

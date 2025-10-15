@@ -80,44 +80,14 @@ const updateProfileValidation = [
     .withMessage('Please provide a valid phone number')
 ];
 
-// @route   POST /api/auth/login
-// @desc    Login user (all roles)
-// @access  Public
+
 router.post('/login', loginValidation, login);
-
-// @route   POST /api/auth/register
-// @desc    Register user (customer/seller)
-// @access  Public
 router.post('/register', registerValidation, register);
-
-// @route   GET /api/auth/profile
-// @desc    Get current user profile
-// @access  Private
 router.get('/profile', protect, getProfile);
-
-// @route   PUT /api/auth/profile
-// @desc    Update user profile
-// @access  Private
 router.put('/profile', protect, updateProfileValidation, updateProfile);
-
-// @route   PUT /api/auth/change-password
-// @desc    Change user password
-// @access  Private
 router.put('/change-password', protect, changePasswordValidation, changePassword);
-
-// @route   POST /api/auth/logout
-// @desc    Logout user
-// @access  Private
 router.post('/logout', protect, logout);
-
-// @route   GET /api/auth/users
-// @desc    Get all users (Admin/Super Admin only)
-// @access  Private (Admin/Super Admin)
 router.get('/users', protect, requireAdmin, getAllUsers);
-
-// @route   GET /api/auth/verify-token
-// @desc    Verify token and get user info
-// @access  Private
 router.get('/verify-token', protect, (req, res) => {
   res.json({
     success: true,

@@ -50,5 +50,4 @@ const initSuperAdmin = async () => {
   }
 };
 
-// Run the script
 initSuperAdmin();
