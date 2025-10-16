@@ -320,9 +320,9 @@ userSchema.statics.createAdmin = async function(adminData, generatedBy) {
 };
 
 // Index for better performance
-userSchema.index({ email: 1 });
-userSchema.index({ role: 1 });
-userSchema.index({ isActive: 1 });
-userSchema.index({ 'sellerInfo.isApproved': 1 });
+// userSchema.index({ email: 1 });
+// userSchema.index({ role: 1 });
+// userSchema.index({ isActive: 1 });
+// userSchema.index({ 'sellerInfo.isApproved': 1 });
 
 module.exports = mongoose.model('User', userSchema);

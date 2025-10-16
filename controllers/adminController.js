@@ -70,9 +70,7 @@ const registerAdmin = async (req, res) => {
   }
 };
 
-// @desc    Login admin
-// @route   POST /api/admin/login
-// @access  Public
+
 const loginAdmin = async (req, res) => {
   try {
     // Check for validation errors
@@ -86,12 +84,12 @@ const loginAdmin = async (req, res) => {
     }
 
     const { email, password } = req.body;
-
     // Find admin by email (only admin, superadmin, moderator roles)
     const admin = await User.findOne({ 
       email, 
       role: { $in: ['admin', 'superadmin', 'moderator'] } 
     }).select('+password');
+    // console.log(admin)
     if (!admin) {
       return res.status(401).json({
         success: false,
@@ -101,11 +99,18 @@ const loginAdmin = async (req, res) => {
 
     // Check if account is locked
     if (admin.isLocked) {
-      return res.status(423).json({
-        success: false,
-        message: 'Account is temporarily locked due to too many failed login attempts'
-      });
+      const isPasswordMatch = await admin.matchPassword(password);
+      if (isPasswordMatch) {
+        await admin.resetLoginAttempts();
+        await admin.updateLastLogin();
+      } else {
+        return res.status(423).json({
+          success: false,
+          message: "Account is locked. Please try again later."
+        });
+      }
     }
+    
 
     // Check if account is active
     if (!admin.isActive) {
@@ -118,7 +123,6 @@ const loginAdmin = async (req, res) => {
     // Check password
     const isPasswordMatch = await admin.matchPassword(password);
     if (!isPasswordMatch) {
-      // Increment login attempts
       await admin.incLoginAttempts();
       
       return res.status(401).json({
@@ -162,7 +166,6 @@ const loginAdmin = async (req, res) => {
   }
 };
 
-// @desc    Get current admin profile
 // @route   GET /api/admin/profile
 // @access  Private
 const getAdminProfile = async (req, res) => {
@@ -207,9 +210,6 @@ const getAdminProfile = async (req, res) => {
   }
 };
 
-// @desc    Update admin profile
-// @route   PUT /api/admin/profile
-// @access  Private
 const updateAdminProfile = async (req, res) => {
   try {
     const { name, phone, address } = req.body;
@@ -258,9 +258,6 @@ const updateAdminProfile = async (req, res) => {
   }
 };
 
-// @desc    Change admin password
-// @route   PUT /api/admin/change-password
-// @access  Private
 const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -310,13 +307,8 @@ const changePassword = async (req, res) => {
   }
 };
 
-// @desc    Logout admin
-// @route   POST /api/admin/logout
-// @access  Private
 const logoutAdmin = async (req, res) => {
   try {
-    // In a production environment, you might want to blacklist the token
-    // For now, we'll just send a success response
     res.json({
       success: true,
       message: 'Logout successful'
@@ -331,8 +323,7 @@ const logoutAdmin = async (req, res) => {
   }
 };
 
-// @desc    Get all admins (Super Admin only)
-// @route   GET /api/admin/admins
+
 // @access  Private (Super Admin only)
 const getAllAdmins = async (req, res) => {
   try {
@@ -374,7 +365,6 @@ const getAllAdmins = async (req, res) => {
   }
 };
 
-// @desc    Update admin status (Super Admin only)
 // @route   PUT /api/admin/:id/status
 // @access  Private (Super Admin only)
 const updateAdminStatus = async (req, res) => {
