@@ -180,36 +180,85 @@ const getCustomerTableData = async (req, res) => {
 const getCustomerOrderHistory = async (req, res) => {
     try {
         const { customerId } = req.params;
+        // IMPORTANT: Ensure req.user.id is a string/object ID from your auth middleware
+        const sellerId = req.user.id; 
 
-        // 1. Find all orders associated with this customerId
-        // We use .sort({ createdAt: -1 }) to show the latest order first
-        const orders = await Order.find({ customer: customerId })
-            .select('orderId totalAmount status orderDate items') // Select relevant fields
-            .sort({ orderDate: -1 });
-
-        if (!orders || orders.length === 0) {
-            // Return an empty array if no orders are found, which is a success state for an empty history
-            return res.status(200).json([]);
+        if (!mongoose.Types.ObjectId.isValid(customerId) || !mongoose.Types.ObjectId.isValid(sellerId)) {
+            return res.status(400).json({ message: "Invalid ID format." });
         }
 
-        // 2. Format the data for the frontend
-        const formattedHistory = orders.map(order => ({
-            orderId: order.orderId, // Or use order._id
-            date: order.orderDate,
-            totalAmount: order.totalAmount,
-            status: order.status,
-            numberOfItems: order.items.length,
-            // Optionally, you can include brief item details if needed
-        }));
+        const historyPipeline = [
+            // 1. Filter by Customer ID
+            {
+                $match: {
+                    user: new mongoose.Types.ObjectId(customerId),
+                }
+            },
+            // 2. Sort by latest orders
+            { $sort: { createdAt: -1 } },
+            
+            // 3. Unwind orderItems
+            { $unwind: "$orderItems" },
+            
+            // 4. FILTER ITEMS *BEFORE* LOOKUP (Crucial optimization and correctness step)
+            // Filter to include ONLY items sold by the current seller
+            {
+                $match: {
+                    "orderItems.seller": new mongoose.Types.ObjectId(sellerId)
+                }
+            },
+            
+            // 5. Group back the seller-relevant items into a single order document
+            {
+                $group: {
+                    _id: "$_id", // Group by original Order ID
+                    orderId: { $first: "$invoiceNumber" }, // Use invoiceNumber for a string ID
+                    date: { $first: "$createdAt" }, // Use createdAt for date
+                    status: { $first: "$orderStatus" }, // Use orderStatus field
+                    
+                    // CRITICAL FIX: Calculate Total Revenue for THIS SELLER
+                    // orderItemSchema uses 'totalPrice' for (sellingPrice - discount) * quantity
+                    sellerTotalAmount: { $sum: "$orderItems.totalPrice" }, 
+                    
+                    // Collect detailed item list for the frontend
+                    items: {
+                        $push: {
+                            productName: "$orderItems.productName",
+                            category: "$orderItems.category", 
+                            subcategory: "$orderItems.subcategory", 
+                            quantity: "$orderItems.quantity",
+                            // Use sellingPrice which is price per unit after discount
+                            price: "$orderItems.sellingPrice", 
+                            variant: { $concat: ["$orderItems.color", " / ", "$orderItems.size", " / ", "$orderItems.unit"] }, // Combine variant fields
+                        }
+                    }
+                }
+            },
+            
+            // 6. Project the required final fields
+            {
+                $project: {
+                    _id: 0,
+                    orderId: "$orderId",
+                    date: 1,
+                    status: 1,
+                    // Round the calculated total
+                    sellerTotalAmount: { $round: ["$sellerTotalAmount", 2] },
+                    items: 1,
+                }
+            }
+        ];
 
-        res.json(formattedHistory);
+        const formattedHistory = await Order.aggregate(historyPipeline);
+        console.log(formattedHistory);
+
+        res.status(200).json(formattedHistory);
 
     } catch (error) {
-        console.error('Error fetching customer order history:', error);
+        console.error('Error fetching seller customer order history:', error);
         res.status(500).json({ message: 'Server Error: Failed to fetch order history' });
     }
 };
-
 
 
 module.exports = {

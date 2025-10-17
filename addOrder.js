@@ -1,71 +1,88 @@
+// insertOrder.js
+
 require('dotenv').config();
 const mongoose = require("mongoose");
-const Order = require("./models/Order"); // Order model
-const Product = require("./models/Product"); // Product model
-const User = require("./models/User"); // User model
+const Order = require("./models/Order"); // Adjust path to your Order model
 
-// --- 1. MongoDB Connection ---
+// --- 1. Order Data to Insert ---
+const ORDER_DATA = {
+  "user": "68f0a9ac07d15521c043ea51",
+  "orderItems": [
+    {
+      "product": "68f08eca66a91ed07aaa6101",
+      "seller": "68f0887566a91ed07aaa60ce",
+      "productName": "T-Shirt",
+      "brand": "Puma",
+      
+      // 💡 UPDATED: Category is now the string name "man"
+      "category": "man", 
+      
+      // 💡 UPDATED: Subcategory is now the string name "clothing"
+      "subcategory": "clothing", 
+      
+      "color": "Maroon",
+      "size": "m",
+      "unit": "m",
+      "basePrice": 500,
+      "sellingPrice": 400,
+      "discount": 0,
+      "quantity": 2, 
+      "totalPrice": 800, 
+      "image": "uploads/1760595658626-247724129.jpg"
+    }
+  ],
+  "shippingAddress": {
+    "fullName": "Pravin Maurya",
+    "phone": "9876543210", 
+    "addressLine1": "Flat No 101, Green Apartments",
+    "addressLine2": "Near City Center Mall",
+    "city": "Mumbai",
+    "postalCode": "400001",
+    "state": "Maharashtra",
+    "country": "India"
+  },
+  "paymentMethod": "Card",
+  "paymentStatus": "Paid",
+  
+  "shippingCost": 50,
+  "discount": 0,
+  
+  "totalAmount": 800, 
+  "finalAmount":800, 
+  
+  "currency": "INR",
+  "orderStatus": "Processing",
+};
+
+// --- 2. MongoDB Connection ---
 const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log("MongoDB connected");
-  } catch (err) {
-    console.error("MongoDB connection error:", err);
-    process.exit(1);
-  }
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("MongoDB connected successfully. 🔗");
+  } catch (err) {
+    console.error("MongoDB connection error: ", err);
+    process.exit(1);
+  }
 };
 
-// --- 2. Create Order for new product ---
-const createCustomOrder = async () => {
-  try {
-    const userId = "68e784aded1c33ab28917fce"; // same customer
-    const productId = "68e549d8755e614f386b432d"; // new product "tv"
+// --- 3. Insertion Function ---
+const insertOrder = async () => {
+  try {
+    console.log("Attempting to insert order data...");
+    
+    const newOrder = await Order.create(ORDER_DATA);
 
-    const product = await Product.findById(productId);
-    if (!product) throw new Error("Product not found");
+    console.log("✅ Order inserted successfully!");
+    console.log(`Order ID: ${newOrder._id}`);
+    console.log(`Generated Invoice Number: ${newOrder.invoiceNumber}`);
+    console.log(`Final Calculated Amount: ₹${newOrder.finalAmount.toFixed(2)}`);
 
-    const orderItem = {
-      product: product._id,
-      variantInfo: {
-        color: product.items[0]?.color || "Default Color",
-        unit: product.items[0]?.sizes[0]?.unit || "Default Unit",
-        info: product.items[0]?.sizes[0]?._id.toString() || "SKU Info",
-      },
-      sellingPrice: product.items[0]?.sizes[0]?.sellingPrice || 5000, // fallback price
-      quantity: 1,
-      image: product.items[0]?.images[0]?.url || "",
-    };
-
-    const totalAmount = orderItem.sellingPrice * orderItem.quantity;
-
-    const newOrder = new Order({
-      user: userId,
-      orderItems: [orderItem],
-      shippingAddress: {
-        fullName: "Ayodhya Gupta",
-        addressLine1: "123 Street Name",
-        addressLine2: "Apartment 45",
-        city: "Bhopal",
-        postalCode: "462001",
-        country: "India",
-      },
-      paymentMethod: "Card",
-      totalAmount,
-      currency: product.currency,
-      orderStatus: "Pending",
-    });
-
-    await newOrder.save();
-    console.log("Order for new product created successfully:", newOrder);
-    process.exit(0);
-  } catch (err) {
-    console.error("Error creating order:", err);
-    process.exit(1);
-  }
+  } catch (error) {
+    console.error("❌ Error during order insertion: ", error.message);
+  } finally {
+    mongoose.connection.close();
+  }
 };
 
-// --- 3. Run Script ---
-connectDB().then(() => createCustomOrder());
+// --- 4. Execute Script ---
+connectDB().then(() => insertOrder());

@@ -6,11 +6,13 @@ const sellerProfileSchema = new mongoose.Schema({
   // Tax Details
   gstNumber: { type: String, default: null },
   panNumber: { type: String, default: null },
-  panHolderName: { type: String, default: null }, // NEW: PAN holder name
+  panHolderName: { type: String, default: null },
   nonGstCategory: { type: Boolean, default: false },
 
-  // Store Name
+  // Store Details (UPDATED)
   storeName: { type: String, default: null },
+  shortTitle: { type: String, default: null }, // Added field for short store title
+  storeDescription: { type: String, default: null }, // Added field for store description
 
   // Shipping & Pickup
   pickupAddress: {
@@ -18,7 +20,7 @@ const sellerProfileSchema = new mongoose.Schema({
     city: { type: String, default: null },
     stateName: { type: String, default: null },
     pinCode: { type: String, default: null },
-    country: { type: String, default: null }, // NEW
+    country: { type: String, default: null },
   },
 
   // Bank Details

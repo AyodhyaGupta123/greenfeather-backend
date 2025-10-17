@@ -74,6 +74,7 @@ exports.getAllUsers = async (req, res, next) => {
   }
 };
 
+
 exports.deleteUser = async (req, res, next) => {
   try {
     if (req.user.role !== "superadmin") {

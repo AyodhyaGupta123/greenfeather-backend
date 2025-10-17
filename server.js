@@ -13,6 +13,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const unifiedAuthRoutes = require('./routes/unifiedAuthRoutes');
 const adminManagementRoutes = require('./routes/adminManagementRoutes'); 
 const customerRoutes = require('./routes/customerRoutes');
+const sellerDashboardRoutes = require('./routes/sellerDashboardRoutes');
 const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
@@ -72,6 +73,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/auth', unifiedAuthRoutes);
 app.use('/api/coustomer', customerRoutes);
 app.use('/api/admin-management', adminManagementRoutes);
+app.use('/api/seller/dashboard', sellerDashboardRoutes);
 
 // Centralized error handler
 const errorHandler = require('./middleware/errorHandler');

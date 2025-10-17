@@ -72,34 +72,58 @@ exports.submitTaxDetails = async (req, res) => {
 exports.submitStoreName = async (req, res) => {
   try {
     const userId = req.user._id;
-    
-    const { storeName } = req.body;
+
+ 
+    const { storeName, shortTitle, storeDescription } = req.body;
+
+  
 
     if (!storeName || storeName.trim().length < 3) {
       return res.status(400).json({ message: "Store name is required (min 3 chars)" });
     }
 
+  
+    const countWords = (text) => text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+
+  
+    if (!shortTitle || countWords(shortTitle) === 0 || countWords(shortTitle) > 10) {
+      return res.status(400).json({ message: "Short title is required (1-10 words)" });
+    }
+
+    
+    if (!storeDescription || countWords(storeDescription) === 0 || countWords(storeDescription) > 20) {
+      return res.status(400).json({ message: "Store description is required (1-20 words)" });
+    }
+    
+   
+
+    
     const profile = await SellerProfile.findOne({ userId });
+    
     if (!profile || profile.stepCompleted < 1) {
       return res.status(400).json({ message: "Complete tax details first" });
     }
 
+   
     profile.storeName = storeName.trim();
+    profile.shortTitle = shortTitle.trim();        
+    profile.storeDescription = storeDescription.trim(); 
+
+    
     profile.stepCompleted = Math.max(profile.stepCompleted, 2);
     await profile.save();
 
     return res.json({
       success: true,
-      message: "Store name saved",
+      message: "Store details saved successfully",
       stepCompleted: profile.stepCompleted,
       profile,
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message || "Server error while saving store details" });
   }
 };
-
 
 
 
@@ -180,6 +204,7 @@ exports.getProfile = async (req, res) => {
     const userId = req.user._id;
     const profile = await SellerProfile.findOne({ userId });
     if (!profile) return res.status(404).json({ message: "Profile not found" });
+    console.log(profile)
     return res.json({ profile });
   } catch (err) {
     console.error(err);
