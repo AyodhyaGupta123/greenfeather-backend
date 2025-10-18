@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 
 const hashPassword = async (password) => {
-  const saltRounds = 15;
+  const saltRounds = 12;
   return await bcrypt.hash(password, saltRounds);
 };
 

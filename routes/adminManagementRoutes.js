@@ -85,44 +85,13 @@ const updatePermissionsValidation = [
     .withMessage('Settings permissions must be an object')
 ];
 
-// @route   POST /api/admin/create-super-admin
-// @desc    Create Super Admin (Manual Generation)
-// @access  Private (System only - for initial setup)
 router.post('/create-super-admin', createSuperAdminValidation, createSuperAdmin);
-
-// @route   POST /api/admin/create-admin
-// @desc    Create Admin (Manual Generation)
-// @access  Private (Super Admin only)
 router.post('/create-admin', protect, requireSuperAdmin, createAdminValidation, createAdmin);
-
-// @route   GET /api/admin/admins
-// @desc    Get all admins with pagination
-// @access  Private (Super Admin only)
 router.get('/admins', protect, requireSuperAdmin, getAllAdmins);
-
-// @route   GET /api/admin/:id
-// @desc    Get admin details
-// @access  Private (Super Admin only)
 router.get('/:id', protect, requireSuperAdmin, getAdminDetails);
-
-// @route   PUT /api/admin/:id/permissions
-// @desc    Update admin permissions
-// @access  Private (Super Admin only)
 router.put('/:id/permissions', protect, requireSuperAdmin, updatePermissionsValidation, updateAdminPermissions);
-
-// @route   PUT /api/admin/:id/status
-// @desc    Update admin status
-// @access  Private (Super Admin only)
 router.put('/:id/status', protect, requireSuperAdmin, updateAdminStatus);
-
-// @route   DELETE /api/admin/:id
-// @desc    Delete admin
-// @access  Private (Super Admin only)
 router.delete('/:id', protect, requireSuperAdmin, deleteAdmin);
-
-// @route   GET /api/admin/dashboard-stats
-// @desc    Get dashboard statistics
-// @access  Private (Admin/Super Admin)
 router.get('/dashboard-stats', protect, requireSuperAdmin, getDashboardStats);
 
 module.exports = router;
